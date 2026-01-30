@@ -85,9 +85,7 @@ def add_movie():
 
 def log():
     st.header("History")
-    df = pd.read_sql_query(
-        "SELECT name, date, gun_score, team_score FROM movie_rating", conn
-    )
+    df = pd.read_sql_query("SELECT * FROM movie_rating", conn)
 
     df["date"] = pd.to_datetime(df["date"], errors="coerce")
 
@@ -111,21 +109,23 @@ def log():
 
 
 def update_log():
-    # if "show_form" not in st.session_state:
-    #     st.session_state.show_form = False
+    if "update_show_form" not in st.session_state:
+        st.session_state.update_show_form = False
 
     if st.button("Update Data"):
-        # st.session_state.show_form = True
+        st.session_state.update_show_form = True
 
-        # if st.session_state.show_form:
-        st.subheader("Movie Name")
-        movie = st.text_input("Movie Name", key="update_movie")
+    if st.session_state.update_show_form:
+        st.subheader("ID")
+        update_id = st.number_input("id", key="update_id", step=1, value=None)
+        # st.subheader("Movie Name")
+        # movie = st.text_input("Movie Name", key="update_movie")
         st.subheader("Date")
-        date = st.date_input("date", key="update_date")
+        update_date = st.date_input("date", key="update_date")
         st.subheader("Gun's Score")
-        gun_score = st.slider("", 0, 10, key="update_gun_slide")
+        update_gun_score = st.slider("", 0, 10, key="update_gun_slide")
         st.subheader("Team's Score")
-        team_score = st.slider("", 0, 10, key="update_team_slide")
+        update_team_score = st.slider("", 0, 10, key="update_team_slide")
 
 
 add_movie()
