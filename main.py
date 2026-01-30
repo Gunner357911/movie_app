@@ -7,12 +7,12 @@ cursor = conn.cursor()
 
 
 def check_password():
-    st.title('Movie Rating App!')
-    
+    st.title("Movie Rating App!")
+
     PASSWORD = "gen"
 
     if "authenticated" not in st.session_state:
-        st.session_state.authenticated = False  
+        st.session_state.authenticated = False
 
     if not st.session_state.authenticated:
         # st.text_input("Password", type="password", key="password")
@@ -25,11 +25,13 @@ def check_password():
         return False
     return True
 
+
 if not check_password():
     st.stop()
 
 st.success("Welcome 🎉")
 st.write("This is our app!")
+
 
 def add_movie():
     if "show_form" not in st.session_state:
@@ -53,7 +55,8 @@ def add_movie():
                 st.error("Invalid Movie Name")
                 st.stop()
             else:
-                cursor.execute("""
+                cursor.execute(
+                    """
                     CREATE TABLE IF NOT EXISTS movie_rating (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         name TEXT NOT NULL,
@@ -61,16 +64,18 @@ def add_movie():
                         gun_score INTEGER,
                         team_score INTEGER
                     )
-                    """)
+                    """
+                )
                 cursor.execute(
                     "INSERT INTO movie_rating (name, date, gun_score, team_score) VALUES (?, ?, ?, ?)",
-                    (movie, date, gun_score, team_score)
+                    (movie, date, gun_score, team_score),
                 )
                 conn.commit()
                 # conn.close()
                 st.success(f"Added: {movie}")
                 st.session_state.show_form = False
     "--------------------"
+
 
 # def drop_table():
 #     cursor.execute("""delete from movie_rating""")
@@ -80,22 +85,30 @@ def add_movie():
 
 def log():
     st.header("History")
-    df = pd.read_sql_query("SELECT name, date, gun_score, team_score FROM movie_rating", conn)
+    df = pd.read_sql_query(
+        "SELECT name, date, gun_score, team_score FROM movie_rating", conn
+    )
 
     df["date"] = pd.to_datetime(df["date"], errors="coerce")
 
     year = pd.read_sql_query(
-    "SELECT DISTINCT strftime('%Y', date) AS year FROM movie_rating",
-    conn
-)
+        "SELECT DISTINCT strftime('%Y', date) AS year FROM movie_rating", conn
+    )
     year["year"] = year["year"].astype(int)
-    if st.selectbox("Filter year", year, placeholder="Select year...", index=None, key="filtered_year"):
+    if st.selectbox(
+        "Filter year",
+        year,
+        placeholder="Select year...",
+        index=None,
+        key="filtered_year",
+    ):
         filtered_year = st.session_state.filtered_year
         st.text("filtered")
-        filtered_df = df[df["date"].dt.year==filtered_year]
+        filtered_df = df[df["date"].dt.year == filtered_year]
         st.dataframe(filtered_df)
     else:
         st.dataframe(df)
+
 
 def update_log():
     # if "show_form" not in st.session_state:
@@ -104,7 +117,7 @@ def update_log():
     if st.button("Update Data"):
         # st.session_state.show_form = True
 
-    # if st.session_state.show_form:
+        # if st.session_state.show_form:
         st.subheader("Movie Name")
         movie = st.text_input("Movie Name", key="update_movie")
         st.subheader("Date")
@@ -113,7 +126,6 @@ def update_log():
         gun_score = st.slider("", 0, 10, key="update_gun_slide")
         st.subheader("Team's Score")
         team_score = st.slider("", 0, 10, key="update_team_slide")
-
 
 
 add_movie()
