@@ -4,7 +4,15 @@ import streamlit as st
 import pandas as pd
 import psycopg2
 
-conn = psycopg2.connect(st.secrets["SUPABASE_DB_URL"])
+conn = psycopg2.connect(
+    host=st.secrets["SUPABASE_DB_HOST"],
+    port=5432,
+    dbname=st.secrets["SUPABASE_DB_NAME"],
+    user=st.secrets["SUPABASE_DB_USER"],
+    password=st.secrets["SUPABASE_DB_PASSWORD"],
+    sslmode="require",
+)
+
 # conn = sqlite3.connect("mydb.db")
 cursor = conn.cursor()
 
