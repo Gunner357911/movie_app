@@ -9,7 +9,7 @@ cursor = conn.cursor()
 def check_password():
     st.title("Movie Rating App!")
 
-    PASSWORD = "gen"
+    PASSWORD = "teamgun"
 
     if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
