@@ -112,20 +112,55 @@ def update_log():
     if "update_show_form" not in st.session_state:
         st.session_state.update_show_form = False
 
-    if st.button("Update Data"):
-        st.session_state.update_show_form = True
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.button("Update Name", key="update_name_button")
+    with col2:
+        st.button("Update Date", key="update_date_button")
+    with col3:
+        st.button("Update Gun's Score", key="update_gscore_button")
+    with col4:
+        st.button("Update Team's Score", key="update_tscore_button")
 
-    if st.session_state.update_show_form:
+    if (
+        st.session_state.update_name_button
+        or st.session_state.update_date_button
+        or st.session_state.update_gscore_button
+        or st.session_state.update_tscore_button
+    ):
+        st.session_state.update_show_form = True
+        movie = pd.read_sql_query("SELECT DISTINCT name FROM movie_rating", conn)
+        list1 = ["date", "gscore", "tscore"]
+    if st.session_state.update_show_form and st.session_state.update_name_button:
+
         st.subheader("ID")
         update_id = st.number_input("id", key="update_id", step=1, value=None)
-        # st.subheader("Movie Name")
-        # movie = st.text_input("Movie Name", key="update_movie")
+        st.subheader("Movie Name")
+        update_movie_name = st.text_input("Movie Name", key="update_movie_name")
+
+        if st.button("Save"):
+            cursor.execute(
+                    f"UPDATE movie_rating SET name = ? where id = ?",
+                    (update_movie_name, update_id)
+                )
+            conn.commit()
+            st.success("Updated ✅")
+    
+    if st.session_state.update_show_form and st.session_state.update_date_button:
+        st.subheader("Movie Name")
+        update_movie = st.selectbox("Movie Name", movie, key="update_movie")
         st.subheader("Date")
         update_date = st.date_input("date", key="update_date")
-        st.subheader("Gun's Score")
-        update_gun_score = st.slider("", 0, 10, key="update_gun_slide")
-        st.subheader("Team's Score")
-        update_team_score = st.slider("", 0, 10, key="update_team_slide")
+        # st.subheader("Gun's Score")
+        # update_gun_score = st.slider("", 0, 10, key="update_gun_slide")
+        # st.subheader("Team's Score")
+        # update_team_score = st.slider("", 0, 10, key="update_team_slide")
+
+
+
+
+
+
 
 
 add_movie()
