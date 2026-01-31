@@ -1,8 +1,11 @@
 import streamlit as st
-import sqlite3
-import pandas as pd
 
-conn = sqlite3.connect("mydb.db")
+# import sqlite3
+import pandas as pd
+import psycopg2
+
+conn = psycopg2.connect(st.secrets["SUPABASE_DB_URL"])
+# conn = sqlite3.connect("mydb.db")
 cursor = conn.cursor()
 
 
@@ -15,7 +18,6 @@ def check_password():
         st.session_state.authenticated = False
 
     if not st.session_state.authenticated:
-        # st.text_input("Password", type="password", key="password")
         if st.text_input("Password", type="password", key="password"):
             if st.session_state.password == PASSWORD:
                 st.session_state.authenticated = True
@@ -57,17 +59,17 @@ def add_movie():
             else:
                 cursor.execute(
                     """
-                    CREATE TABLE IF NOT EXISTS movie_rating (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        name TEXT NOT NULL,
-                        date DATE not null,
-                        gun_score INTEGER,
-                        team_score INTEGER
-                    )
+                   CREATE TABLE IF NOT EXISTS movie_rating (
+                    id SERIAL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    date DATE NOT NULL,
+                    gun_score INTEGER,
+                    team_score INTEGER
+                );
                     """
                 )
                 cursor.execute(
-                    "INSERT INTO movie_rating (name, date, gun_score, team_score) VALUES (?, ?, ?, ?)",
+                    "INSERT INTO movie_rating (name, date, gun_score, team_score) VALUES (%s, %s, %s, %s)",
                     (movie, date, gun_score, team_score),
                 )
                 conn.commit()
@@ -90,8 +92,14 @@ def log():
     df["date"] = pd.to_datetime(df["date"], errors="coerce")
 
     year = pd.read_sql_query(
-        "SELECT DISTINCT strftime('%Y', date) AS year FROM movie_rating", conn
+        """
+    SELECT DISTINCT EXTRACT(YEAR FROM date) AS year
+    FROM movie_rating
+    ORDER BY year DESC
+    """,
+        conn,
     )
+
     year["year"] = year["year"].astype(int)
     if st.selectbox(
         "Filter year",
@@ -106,55 +114,6 @@ def log():
         st.dataframe(filtered_df)
     else:
         st.dataframe(df)
-
-
-# def update_log():
-# if "update_show_form" not in st.session_state:
-#     st.session_state.update_show_form = False
-
-# col1, col2, col3, col4 = st.columns(4)
-# with col1:
-#     st.button("Update Name", key="update_name_button")
-# with col2:
-#     st.button("Update Date", key="update_date_button")
-# with col3:
-#     st.button("Update Gun's Score", key="update_gscore_button")
-# with col4:
-#     st.button("Update Team's Score", key="update_tscore_button")
-
-# if (
-#     st.session_state.update_name_button
-#     or st.session_state.update_date_button
-#     or st.session_state.update_gscore_button
-#     or st.session_state.update_tscore_button
-# ):
-#     st.session_state.update_show_form = True
-#     movie = pd.read_sql_query("SELECT DISTINCT name FROM movie_rating", conn)
-
-# if st.session_state.update_show_form and st.session_state.update_name_button:
-
-#     st.subheader("ID")
-#     update_id = st.number_input("id", key="update_id", step=1, value=None)
-#     st.subheader("Movie Name")
-#     update_movie_name = st.text_input("Movie Name", key="update_movie_name")
-
-#     if st.button("Save"):
-#         cursor.execute(
-#                 f"UPDATE movie_rating SET name = ? where id = ?",
-#                 (update_movie_name, update_id)
-#             )
-#         conn.commit()
-#         st.success("Updated ✅")
-
-# if st.session_state.update_show_form and st.session_state.update_date_button:
-#     st.subheader("Movie Name")
-#     update_movie = st.selectbox("Movie Name", movie, key="update_movie")
-#     st.subheader("Date")
-#     update_date = st.date_input("date", key="update_date")
-# st.subheader("Gun's Score")
-# update_gun_score = st.slider("", 0, 10, key="update_gun_slide")
-# st.subheader("Team's Score")
-# update_team_score = st.slider("", 0, 10, key="update_team_slide")
 
 
 def update_log_with_form():
@@ -188,7 +147,7 @@ def update_log_with_form():
             submitted = st.form_submit_button("Save")
             if submitted:
                 cursor.execute(
-                    "UPDATE movie_rating SET name = ? WHERE id = ?",
+                    "UPDATE movie_rating SET name = %s WHERE id = %s",
                     (update_movie_name, update_id),
                 )
                 conn.commit()
@@ -204,7 +163,7 @@ def update_log_with_form():
             submitted = st.form_submit_button("Save")
             if submitted:
                 cursor.execute(
-                    "UPDATE movie_rating SET date = ? WHERE name = ?",
+                    "UPDATE movie_rating SET date = %s WHERE name = %s",
                     (update_date, update_movie),
                 )
                 conn.commit()
@@ -220,7 +179,7 @@ def update_log_with_form():
             submitted = st.form_submit_button("Save")
             if submitted:
                 cursor.execute(
-                    "UPDATE movie_rating SET gun_score = ? WHERE name = ?",
+                    "UPDATE movie_rating SET gun_score = %s WHERE name = %s",
                     (update_gun_score, update_movie),
                 )
                 conn.commit()
@@ -236,13 +195,12 @@ def update_log_with_form():
             submitted = st.form_submit_button("Save")
             if submitted:
                 cursor.execute(
-                    "UPDATE movie_rating SET team_score = ? WHERE name = ?",
+                    "UPDATE movie_rating SET team_score = %s WHERE name = %s",
                     (update_team_score, update_movie),
                 )
                 conn.commit()
                 st.success("Updated ✅")
                 st.session_state.update_mode = None
-
 
 
 add_movie()
