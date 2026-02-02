@@ -23,7 +23,7 @@ I’m still a **beginner developer**, so the code may not be perfect, but it wor
 
 - **Python**
 - **Streamlit** (UI)
-- **Postgres** (Database)
+- **SQLite** (Database)
 - **Pandas** (Data handling)
 
 ---
