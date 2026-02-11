@@ -52,6 +52,8 @@ def add_movie():
         gun_score = st.slider("", 0, 10, key="gun_slide")
         st.subheader("Team's Score")
         team_score = st.slider("", 0, 10, key="team_slide")
+        st.subheader("Comment")
+        comment = st.text_input("Comment", key="comment")
 
         if st.button("Save Movie"):
             if len(movie) < 1:
@@ -65,13 +67,14 @@ def add_movie():
                     name TEXT NOT NULL,
                     date DATE NOT NULL,
                     gun_score INTEGER,
-                    team_score INTEGER
+                    team_score INTEGER,
+                    comment TEXT NOT NULL
                 );
                     """
                 )
                 cursor.execute(
-                    "INSERT INTO movie_rating (name, date, gun_score, team_score) VALUES (%s, %s, %s, %s)",
-                    (movie, date, gun_score, team_score),
+                    "INSERT INTO movie_rating (name, date, gun_score, team_score) VALUES (%s, %s, %s, %s, %s)",
+                    (movie, date, gun_score, team_score, comment),
                 )
                 conn.commit()
                 # conn.close()
