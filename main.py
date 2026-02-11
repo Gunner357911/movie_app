@@ -218,7 +218,7 @@ def update_log_with_form():
             submitted = st.form_submit_button("Save")
             if submitted:
                 cursor.execute(
-                    "UPDATE comment SET comment = %s WHERE name = %s",
+                    "UPDATE movie_rating SET comment = %s WHERE name = %s",
                     (update_comment, update_movie),
                 )
                 conn.commit()
