@@ -126,7 +126,7 @@ def update_log_with_form():
 
     movie = pd.read_sql_query("SELECT DISTINCT name FROM movie_rating", conn)
 
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
 
     with col1:
         if st.button("Update Name", use_container_width=True):
@@ -140,6 +140,9 @@ def update_log_with_form():
     with col4:
         if st.button("Update Team's Score", use_container_width=True):
             st.session_state.update_mode = "tscore"
+    with col5:
+        if st.button("Update Comment", use_container_width=True):
+            st.session_state.update_mode = "up_comment"
 
     # ---------- UPDATE NAME ----------
     if st.session_state.update_mode == "name":
@@ -201,6 +204,22 @@ def update_log_with_form():
                 cursor.execute(
                     "UPDATE movie_rating SET team_score = %s WHERE name = %s",
                     (update_team_score, update_movie),
+                )
+                conn.commit()
+                st.success("Updated ✅")
+                st.session_state.update_mode = None
+    
+    if st.session_state.update_mode == "up_comment":
+        with st.form("update_comment"):
+            st.subheader("Update Comment")
+            update_movie = st.selectbox("Movie Name", movie, key="update_movie")
+            update_comment = st.text_input("")
+
+            submitted = st.form_submit_button("Save")
+            if submitted:
+                cursor.execute(
+                    "UPDATE comment SET comment = %s WHERE name = %s",
+                    (update_comment, update_movie),
                 )
                 conn.commit()
                 st.success("Updated ✅")
