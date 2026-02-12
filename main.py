@@ -210,7 +210,7 @@ def update_log_with_form():
                 st.session_state.update_mode = None
     
     if st.session_state.update_mode == "up_comment":
-        with st.form("update_comment"):
+        # with st.form("update_comment"):
             st.subheader("Update Comment")
             update_movie = st.selectbox("Movie Name", movie, key="update_movie")
             update_comment = st.text_area("")
