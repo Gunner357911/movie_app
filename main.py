@@ -54,7 +54,7 @@ def add_movie():
         team_score = st.slider("", 0, 10, key="team_slide")
         st.subheader("Comment")
         comment = st.text_area("Comment", key="comment")
-        comment = comment.astype(str)
+        comment = str(comment)
 
         if st.button("Save Movie"):
             if len(movie) < 1:
