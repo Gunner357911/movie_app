@@ -53,7 +53,7 @@ def add_movie():
         st.subheader("Team's Score")
         team_score = st.slider("", 0, 10, key="team_slide")
         st.subheader("Comment")
-        comment = st.text_input("Comment", key="comment")
+        comment = st.text_area("Comment", key="comment")
 
         if st.button("Save Movie"):
             if len(movie) < 1:
@@ -217,7 +217,7 @@ def update_log_with_form():
 
             # submitted = st.form_submit_button("Save")
             # if submitted:
-            if st.form_submit_button("Save"):
+            if st.button("Save"):
                 cursor.execute(
                     "UPDATE movie_rating SET comment = %s WHERE name = %s",
                     (update_comment, update_movie),
