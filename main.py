@@ -215,7 +215,7 @@ def update_log_with_form():
             update_movie = st.selectbox("Movie Name", movie, key="update_movie")
             update_comment = st.text_area("")
 
-            submitted = st.form_submit_button("Save")
+            # submitted = st.form_submit_button("Save")
             # if submitted:
             if st.form_submit_button("Save"):
                 cursor.execute(
