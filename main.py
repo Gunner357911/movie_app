@@ -216,7 +216,8 @@ def update_log_with_form():
             update_comment = st.text_area("")
 
             submitted = st.form_submit_button("Save")
-            if submitted:
+            # if submitted:
+            if st.form_submit_button("Save"):
                 cursor.execute(
                     "UPDATE movie_rating SET comment = %s WHERE name = %s",
                     (update_comment, update_movie),
