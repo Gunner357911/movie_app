@@ -73,7 +73,7 @@ def add_movie():
                     """
                 )
                 cursor.execute(
-                    "INSERT INTO movie_rating (name, date, gun_score, team_score) VALUES (%s, %s, %s, %s, %s)",
+                    "INSERT INTO movie_rating (name, date, gun_score, team_score, comment) VALUES (%s, %s, %s, %s, %s)",
                     (movie, date, gun_score, team_score, comment),
                 )
                 conn.commit()
