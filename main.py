@@ -4,7 +4,14 @@ import streamlit as st
 import pandas as pd
 import psycopg2
 
-conn = psycopg2.connect(st.secrets["SUPABASE_DB_URL"])
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+db_url = os.getenv("SUPABASE_DB_URL") 
+# or st.secrets["SUPABASE_DB_URL"]
+conn = psycopg2.connect(db_url)
 
 # conn = sqlite3.connect("mydb.db")
 cursor = conn.cursor()
@@ -13,7 +20,8 @@ cursor = conn.cursor()
 def check_password():
     st.title("Movie Rating App!")
 
-    PASSWORD = st.secrets["app_password"]
+    PASSWORD = os.getenv("app_password") 
+    # or st.secrets["app_password"]
 
     if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
@@ -209,23 +217,23 @@ def update_log_with_form():
                 conn.commit()
                 st.success("Updated ✅")
                 st.session_state.update_mode = None
-    
+
     if st.session_state.update_mode == "up_comment":
         # with st.form("update_comment"):
-            st.subheader("Update Comment")
-            update_movie = st.selectbox("Movie Name", movie, key="update_movie")
-            update_comment = st.text_area("")
+        st.subheader("Update Comment")
+        update_movie = st.selectbox("Movie Name", movie, key="update_movie")
+        update_comment = st.text_area("")
 
-            # submitted = st.form_submit_button("Save")
-            # if submitted:
-            if st.button("Save"):
-                cursor.execute(
-                    "UPDATE movie_rating SET comment = %s WHERE name = %s",
-                    (update_comment, update_movie),
-                )
-                conn.commit()
-                st.success("Updated ✅")
-                st.session_state.update_mode = None
+        # submitted = st.form_submit_button("Save")
+        # if submitted:
+        if st.button("Save"):
+            cursor.execute(
+                "UPDATE movie_rating SET comment = %s WHERE name = %s",
+                (update_comment, update_movie),
+            )
+            conn.commit()
+            st.success("Updated ✅")
+            st.session_state.update_mode = None
 
 
 add_movie()
