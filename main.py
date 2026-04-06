@@ -6,6 +6,10 @@ import psycopg2
 
 import os
 from dotenv import load_dotenv
+import requests
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 load_dotenv()
 
@@ -99,21 +103,33 @@ def add_movie():
 
 
 def log():
+
+    data = requests.get("http://127.0.0.1:8000/show")
+
+    #list of dict
+    data = data.json()
+
+    df = pd.DataFrame(data)
+
     st.header("History")
-    df = pd.read_sql_query("SELECT * FROM movie_rating", conn)
+
+    # df = pd.read_sql_query("SELECT * FROM movie_rating", conn)
 
     df["date"] = pd.to_datetime(df["date"], errors="coerce")
 
-    year = pd.read_sql_query(
-        """
-    SELECT DISTINCT EXTRACT(YEAR FROM date) AS year
-    FROM movie_rating
-    ORDER BY year DESC
-    """,
-        conn,
-    )
+    # year = pd.read_sql_query(
+    #     """
+    # SELECT DISTINCT EXTRACT(YEAR FROM date) AS year
+    # FROM movie_rating
+    # ORDER BY year DESC
+    # """,
+    #     conn,
+    # )
 
-    year["year"] = year["year"].astype(int)
+    year = df['date'].dt.year.unique()
+
+    # year["year"] = year["year"].astype(int)
+
     if st.selectbox(
         "Filter year",
         year,
