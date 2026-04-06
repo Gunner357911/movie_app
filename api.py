@@ -3,6 +3,9 @@ from fastapi import FastAPI
 import os
 from dotenv import load_dotenv
 import pandas as pd
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 load_dotenv()
 
@@ -21,4 +24,4 @@ def get_all_data():
 
     df = pd.read_sql_query("SELECT * FROM movie_rating", conn)
 
-    return df
+    return df.to_dict(orient="records")
