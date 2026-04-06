@@ -102,14 +102,18 @@ def add_movie():
 #     conn.close()
 
 
-def log():
-
+def get_data():
     data = requests.get("http://127.0.0.1:8000/show")
 
     #list of dict
     data = data.json()
 
-    df = pd.DataFrame(data)
+    return data
+
+
+def log():
+
+    df = pd.DataFrame(get_data())
 
     st.header("History")
 
