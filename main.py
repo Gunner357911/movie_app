@@ -85,12 +85,27 @@ def add_movie():
                 );
                     """
                 )
-                cursor.execute(
-                    "INSERT INTO movie_rating (name, date, gun_score, team_score, comment) VALUES (%s, %s, %s, %s, %s)",
-                    (movie, date, gun_score, team_score, comment),
-                )
-                conn.commit()
+                # cursor.execute(
+                #     "INSERT INTO movie_rating (name, date, gun_score, team_score, comment) VALUES (%s, %s, %s, %s, %s)",
+                #     (movie, date, gun_score, team_score, comment),
+                # )
+                # conn.commit()
                 # conn.close()
+
+                logging.info(date)
+
+                res = requests.post("http://127.0.0.1:8000/add_movie", 
+                              json={"movie": movie, 
+                                    "date": date.isoformat(), #JSON doesn't understand datetime
+                                    "gun_score": gun_score,
+                                    "team_score": team_score,
+                                    "comment": comment}
+                                    )
+                if res.status_code == 200:
+                    st.success("Saved successfully!")
+                else:
+                    st.error(f"Error: {res.status_code}")
+
                 st.success(f"Added: {movie}")
                 st.session_state.show_form = False
     "--------------------"
