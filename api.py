@@ -20,6 +20,9 @@ class Movie(BaseModel):
     team_score: int
     comment: str
 
+class Num(BaseModel):
+    number: int
+
 def get_conn():
     db_url = os.getenv("SUPABASE_DB_URL") 
 # or st.secrets["SUPABASE_DB_URL"]
@@ -52,3 +55,10 @@ def add_movie(data: Movie):
     conn.commit()
     cursor.close()
     conn.close()
+
+
+@app.post("/test_add_num")
+async def add_number(data: Num):
+    new_num = data.number * 2
+
+    return {"result": new_num}
