@@ -51,7 +51,7 @@ It’s just a simple app to make movie nights more fun 😄
 
 I wanted to:
 - Practice Python and Streamlit
-- Learn how to use SQLite with a real app
+- Learn how to use SQL(Supabase) with a real app
 - Build something fun that I can actually use with friends
 
 ---
