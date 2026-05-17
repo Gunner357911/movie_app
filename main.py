@@ -3,6 +3,9 @@ import streamlit as st
 # import sqlite3
 import pandas as pd
 import psycopg2
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 conn = psycopg2.connect(st.secrets["SUPABASE_DB_URL"])
 
@@ -29,11 +32,30 @@ def check_password():
     return True
 
 
+def show_monthly():
+
+    monthly = pd.read_sql_query(
+    """with a as (
+        select 
+        name,
+        extract(year from date) as year,
+        extract(month from date) as month,
+        extract(year from current_date) as cur_year,
+        extract(month from current_date) as cur_month
+        from movie_rating)
+
+        select count(*) from a where year = cur_year and month = cur_month""", conn)
+    
+    res = monthly.iloc[0, 0]
+
+    st.metric(label="This month we have watched:", value=f"{res} movie(s)")
+
 if not check_password():
     st.stop()
 
 st.success("Welcome 🎉")
 st.write("This is our app!")
+show_monthly()
 
 
 def add_movie():
