@@ -4,10 +4,21 @@ import streamlit as st
 import pandas as pd
 import psycopg2
 import logging
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 
-conn = psycopg2.connect(st.secrets["SUPABASE_DB_URL"])
+
+try:
+    DB_URL = st.secrets["SUPABASE_DB_URL"]
+except:
+    DB_URL = os.getenv("SUPABASE_DB_URL")
+
+
+conn = psycopg2.connect(DB_URL)
 
 # conn = sqlite3.connect("mydb.db")
 cursor = conn.cursor()
@@ -16,7 +27,10 @@ cursor = conn.cursor()
 def check_password():
     st.title("Movie Rating App!")
 
-    PASSWORD = st.secrets["app_password"]
+    try:
+        PASSWORD = st.secrets["app_password"]
+    except Exception:
+        PASSWORD = os.getenv("app_password")
 
     if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
@@ -35,7 +49,7 @@ def check_password():
 def show_monthly():
 
     monthly = pd.read_sql_query(
-    """with a as (
+        """with a as (
         select 
         name,
         extract(year from date) as year,
@@ -44,18 +58,38 @@ def show_monthly():
         extract(month from current_date) as cur_month
         from movie_rating)
 
-        select count(*) from a where year = cur_year and month = cur_month""", conn)
-    
+        select count(*) from a where year = cur_year and month = cur_month""",
+        conn,
+    )
+
     res = monthly.iloc[0, 0]
 
     st.metric(label="This month we have watched:", value=f"{res} movie(s)")
 
-if not check_password():
-    st.stop()
 
-st.success("Welcome 🎉")
-st.write("This is our app!")
-show_monthly()
+def show_quarterly():
+
+    query = pd.read_sql_query(
+        """with a as 
+    (SELECT *, concat(
+        EXTRACT(YEAR FROM date), '-',
+        CASE
+            WHEN EXTRACT(MONTH FROM date) BETWEEN 1 AND 3 THEN 'Q1'
+            WHEN EXTRACT(MONTH FROM date) BETWEEN 4 AND 6 THEN 'Q2'
+            WHEN EXTRACT(MONTH FROM date) BETWEEN 7 AND 9 THEN 'Q3'
+            WHEN EXTRACT(MONTH FROM date) BETWEEN 10 AND 12 THEN 'Q4'
+        END) AS quarter
+    FROM movie_rating)
+
+    select distinct(quarter), count(quarter) as movies_count 
+    from a group by quarter order by quarter desc limit 1""",
+        conn,
+    )
+
+    quar = query.iloc[0, 0]
+    number = query.iloc[0, 1]
+
+    st.metric(label=f"This quarter: {quar}", value=f"{number} movie(s)")
 
 
 def add_movie():
@@ -231,24 +265,38 @@ def update_log_with_form():
                 conn.commit()
                 st.success("Updated ✅")
                 st.session_state.update_mode = None
-    
+
     if st.session_state.update_mode == "up_comment":
         # with st.form("update_comment"):
-            st.subheader("Update Comment")
-            update_movie = st.selectbox("Movie Name", movie, key="update_movie")
-            update_comment = st.text_area("")
+        st.subheader("Update Comment")
+        update_movie = st.selectbox("Movie Name", movie, key="update_movie")
+        update_comment = st.text_area("")
 
-            # submitted = st.form_submit_button("Save")
-            # if submitted:
-            if st.button("Save"):
-                cursor.execute(
-                    "UPDATE movie_rating SET comment = %s WHERE name = %s",
-                    (update_comment, update_movie),
-                )
-                conn.commit()
-                st.success("Updated ✅")
-                st.session_state.update_mode = None
+        # submitted = st.form_submit_button("Save")
+        # if submitted:
+        if st.button("Save"):
+            cursor.execute(
+                "UPDATE movie_rating SET comment = %s WHERE name = %s",
+                (update_comment, update_movie),
+            )
+            conn.commit()
+            st.success("Updated ✅")
+            st.session_state.update_mode = None
 
+
+if not check_password():
+    st.stop()
+
+st.success("Welcome 🎉")
+st.write("This is our app!")
+
+left, right = st.columns(2)
+
+with left:
+    show_monthly()
+
+with right:
+    show_quarterly()
 
 add_movie()
 log()
