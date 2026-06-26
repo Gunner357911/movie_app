@@ -92,6 +92,59 @@ def show_quarterly():
     st.metric(label=f"This quarter: {quar}", value=f"{number} movie(s)")
 
 
+def show_highest_rated():
+    df = pd.read_sql_query(
+        "SELECT name, gun_score, team_score FROM movie_rating",
+        conn
+    )
+    if df.empty:
+        return
+
+    # Calculate combined average score
+    df["avg_score"] = df[["gun_score", "team_score"]].mean(axis=1)
+    df = df.dropna(subset=["avg_score"])
+    
+    if df.empty:
+        return
+        
+    max_score = df["avg_score"].max()
+    highest_movies = df[df["avg_score"] == max_score]
+    
+    names = highest_movies["name"].tolist()
+    
+    if len(names) == 1:
+        movie_title = names[0]
+        header_text = "🏆 All Time Highest Rated Movie"
+    else:
+        movie_title = " & ".join(names)
+        header_text = "🏆 All Time Co-Highest Rated Movies"
+        
+    st.markdown(
+        f"""
+        <div style="
+            background: linear-gradient(135deg, #1e1e24 0%, #2a2a35 100%);
+            padding: 24px;
+            border-radius: 12px;
+            border-left: 6px solid #FFD700;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            margin: 15px 0 25px 0;
+            text-align: center;
+        ">
+            <span style="font-size: 13px; text-transform: uppercase; letter-spacing: 2px; color: #FFD700; font-weight: bold;">
+                {header_text}
+            </span>
+            <h1 style="margin: 10px 0 5px 0; color: #FFFFFF; font-family: 'Outfit', 'Inter', sans-serif; font-size: 32px; font-weight: 800; border-bottom: none;">
+                {movie_title}
+            </h1>
+            <p style="margin: 0; color: #a0a0b0; font-size: 18px;">
+                Average Score: <strong style="color: #FFD700; font-size: 22px;">{max_score:.1f}</strong> <span style="font-size: 14px; color: #707080;">/ 10</span>
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
 def add_movie():
     if "show_form" not in st.session_state:
         st.session_state.show_form = False
@@ -297,6 +350,8 @@ with left:
 
 with right:
     show_quarterly()
+
+show_highest_rated()
 
 add_movie()
 log()
