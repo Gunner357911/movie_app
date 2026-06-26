@@ -57,6 +57,24 @@ def add_movie(data: Movie):
     conn.close()
 
 
+@app.get("/avg_score_by_month")
+def avg_score_by_month():
+    conn = get_conn()
+    df = pd.read_sql_query(
+        """
+        SELECT
+            TO_CHAR(date, 'YYYY-MM') AS month,
+            ROUND(AVG((gun_score + team_score) / 2.0)::numeric, 2) AS avg_score
+        FROM movie_rating
+        GROUP BY TO_CHAR(date, 'YYYY-MM')
+        ORDER BY month
+        """,
+        conn,
+    )
+    conn.close()
+    return df.to_dict(orient="records")
+
+
 @app.post("/test_add_num")
 async def add_number(data: Num):
     new_num = data.number * 2

@@ -271,6 +271,19 @@ def update_log_with_form():
             st.session_state.update_mode = None
 
 
+def avg_score_chart():
+    st.header("Average Score by Month")
+    data = requests.get("http://127.0.0.1:8000/avg_score_by_month").json()
+    df = pd.DataFrame(data)
+    if df.empty:
+        st.info("No data available.")
+        return
+    df = df.set_index("month")
+    df.columns = ["Avg Score"]
+    st.bar_chart(df)
+
+
 add_movie()
+avg_score_chart()
 log()
 update_log_with_form()
