@@ -10,6 +10,8 @@ logging.basicConfig(level=logging.INFO)
 load_dotenv()
 
 api_url = os.getenv("API_URL")
+API_KEY = os.getenv("API_KEY")
+HEADERS = {"X-API-Key": API_KEY}
 
 
 def check_password():
@@ -74,6 +76,7 @@ def add_movie():
                         "team_score": team_score,
                         "comment": comment,
                     },
+                    headers=HEADERS,
                 )
                 if res.status_code == 200:
                     st.success("Saved successfully!")
@@ -86,7 +89,7 @@ def add_movie():
 
 
 def get_data():
-    data = requests.get(f"{api_url}/show")
+    data = requests.get(f"{api_url}/show", headers=HEADERS)
     data = data.json()
     return data
 
@@ -150,6 +153,7 @@ def update_log_with_form():
                 requests.put(
                     f"{api_url}/update_movie",
                     json={"id": update_id, "movie": update_movie_name},
+                    headers=HEADERS,
                 )
                 st.success("Updated ✅")
                 st.session_state.update_mode = None
@@ -165,6 +169,7 @@ def update_log_with_form():
                 requests.put(
                     f"{api_url}/update_movie",
                     json={"filter_movie": update_movie, "date": str(update_date)},
+                    headers=HEADERS,
                 )
                 st.success("Updated ✅")
                 st.session_state.update_mode = None
@@ -180,6 +185,7 @@ def update_log_with_form():
                 requests.put(
                     f"{api_url}/update_movie",
                     json={"filter_movie": update_movie, "gun_score": update_gun_score},
+                    headers=HEADERS,
                 )
                 st.success("Updated ✅")
                 st.session_state.update_mode = None
@@ -195,6 +201,7 @@ def update_log_with_form():
                 requests.put(
                     f"{api_url}/update_movie",
                     json={"filter_movie": update_movie, "team_score": update_team_score},
+                    headers=HEADERS,
                 )
                 st.success("Updated ✅")
                 st.session_state.update_mode = None
@@ -208,6 +215,7 @@ def update_log_with_form():
             requests.put(
                 f"{api_url}/update_movie",
                 json={"filter_movie": update_movie, "comment": update_comment},
+                headers=HEADERS,
             )
             st.success("Updated ✅")
             st.session_state.update_mode = None
@@ -215,7 +223,7 @@ def update_log_with_form():
 
 def avg_score_chart():
     st.header("Average Score by Month")
-    data = requests.get(f"{api_url}/avg_score_by_month").json()
+    data = requests.get(f"{api_url}/avg_score_by_month", headers=HEADERS).json()
     df = pd.DataFrame(data)
     if df.empty:
         st.info("No data available.")

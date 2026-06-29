@@ -1,5 +1,5 @@
 import psycopg2
-from fastapi import FastAPI
+from fastapi import FastAPI, Header, HTTPException, Depends
 import os
 from dotenv import load_dotenv
 import pandas as pd
@@ -12,7 +12,13 @@ logging.basicConfig(level=logging.INFO)
 
 load_dotenv()
 
-app = FastAPI()
+API_KEY = os.getenv("API_KEY")
+
+def verify_key(x_api_key: str = Header(...)):
+    if x_api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+app = FastAPI(dependencies=[Depends(verify_key)])
 
 class Movie(BaseModel):
     movie: str
