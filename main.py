@@ -1,9 +1,5 @@
 import streamlit as st
-
-# import sqlite3
 import pandas as pd
-import psycopg2
-
 import os
 from dotenv import load_dotenv
 import requests
@@ -14,19 +10,12 @@ logging.basicConfig(level=logging.INFO)
 load_dotenv()
 
 api_url = os.getenv("API_URL")
-db_url = os.getenv("SUPABASE_DB_URL")
-# or st.secrets["SUPABASE_DB_URL"]
-conn = psycopg2.connect(db_url)
-
-# conn = sqlite3.connect("mydb.db")
-cursor = conn.cursor()
 
 
 def check_password():
     st.title("Movie Rating App!")
 
-    PASSWORD = os.getenv("app_password") 
-    # or st.secrets["app_password"]
+    PASSWORD = os.getenv("app_password")
 
     if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
@@ -74,34 +63,18 @@ def add_movie():
                 st.error("Invalid Movie Name")
                 st.stop()
             else:
-                cursor.execute(
-                    """
-                   CREATE TABLE IF NOT EXISTS movie_rating (
-                    id SERIAL PRIMARY KEY,
-                    name TEXT NOT NULL,
-                    date DATE NOT NULL,
-                    gun_score INTEGER,
-                    team_score INTEGER,
-                    comment TEXT NOT NULL
-                );
-                    """
-                )
-                # cursor.execute(
-                #     "INSERT INTO movie_rating (name, date, gun_score, team_score, comment) VALUES (%s, %s, %s, %s, %s)",
-                #     (movie, date, gun_score, team_score, comment),
-                # )
-                # conn.commit()
-                # conn.close()
-
                 logging.info(date)
 
-                res = requests.post(f"{api_url}/add_movie",
-                              json={"movie": movie, 
-                                    "date": date.isoformat(), #JSON doesn't understand datetime
-                                    "gun_score": gun_score,
-                                    "team_score": team_score,
-                                    "comment": comment}
-                                    )
+                res = requests.post(
+                    f"{api_url}/add_movie",
+                    json={
+                        "movie": movie,
+                        "date": date.isoformat(),
+                        "gun_score": gun_score,
+                        "team_score": team_score,
+                        "comment": comment,
+                    },
+                )
                 if res.status_code == 200:
                     st.success("Saved successfully!")
                 else:
@@ -112,43 +85,20 @@ def add_movie():
     "--------------------"
 
 
-# def del_table_data():
-#     cursor.execute("""delete from movie_rating""")
-#     conn.commit()
-#     conn.close()
-
-
 def get_data():
     data = requests.get(f"{api_url}/show")
-
-    #list of dict
     data = data.json()
-
     return data
 
 
 def log():
-
     df = pd.DataFrame(get_data())
 
     st.header("History")
 
-    # df = pd.read_sql_query("SELECT * FROM movie_rating", conn)
-
     df["date"] = pd.to_datetime(df["date"], errors="coerce")
 
-    # year = pd.read_sql_query(
-    #     """
-    # SELECT DISTINCT EXTRACT(YEAR FROM date) AS year
-    # FROM movie_rating
-    # ORDER BY year DESC
-    # """,
-    #     conn,
-    # )
-
-    year = df['date'].dt.year.unique()
-
-    # year["year"] = year["year"].astype(int)
+    year = df["date"].dt.year.unique()
 
     if st.selectbox(
         "Filter year",
@@ -169,7 +119,7 @@ def update_log_with_form():
     if "update_mode" not in st.session_state:
         st.session_state.update_mode = None
 
-    movie = pd.read_sql_query("SELECT DISTINCT name FROM movie_rating", conn)
+    movie_names = sorted(set(row["name"] for row in get_data()))
 
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
 
@@ -189,7 +139,6 @@ def update_log_with_form():
         if st.button("Update Comment", use_container_width=True):
             st.session_state.update_mode = "up_comment"
 
-    # ---------- UPDATE NAME ----------
     if st.session_state.update_mode == "name":
         with st.form("update_name"):
             st.subheader("Update Movie Name")
@@ -198,76 +147,68 @@ def update_log_with_form():
 
             submitted = st.form_submit_button("Save")
             if submitted:
-                cursor.execute(
-                    "UPDATE movie_rating SET name = %s WHERE id = %s",
-                    (update_movie_name, update_id),
+                requests.put(
+                    f"{api_url}/update_movie",
+                    json={"id": update_id, "movie": update_movie_name},
                 )
-                conn.commit()
                 st.success("Updated ✅")
                 st.session_state.update_mode = None
 
     if st.session_state.update_mode == "date":
         with st.form("update_date"):
             st.subheader("Update Date")
-            update_movie = st.selectbox("Movie Name", movie, key="update_movie")
+            update_movie = st.selectbox("Movie Name", movie_names, key="update_movie")
             update_date = st.date_input("date", key="update_date")
 
             submitted = st.form_submit_button("Save")
             if submitted:
-                cursor.execute(
-                    "UPDATE movie_rating SET date = %s WHERE name = %s",
-                    (update_date, update_movie),
+                requests.put(
+                    f"{api_url}/update_movie",
+                    json={"filter_movie": update_movie, "date": str(update_date)},
                 )
-                conn.commit()
                 st.success("Updated ✅")
                 st.session_state.update_mode = None
 
     if st.session_state.update_mode == "gscore":
         with st.form("update_gscore"):
             st.subheader("Update Gun's Score")
-            update_movie = st.selectbox("Movie Name", movie, key="update_movie")
+            update_movie = st.selectbox("Movie Name", movie_names, key="update_movie")
             update_gun_score = st.slider("", 0, 10, key="update_gun_slide")
 
             submitted = st.form_submit_button("Save")
             if submitted:
-                cursor.execute(
-                    "UPDATE movie_rating SET gun_score = %s WHERE name = %s",
-                    (update_gun_score, update_movie),
+                requests.put(
+                    f"{api_url}/update_movie",
+                    json={"filter_movie": update_movie, "gun_score": update_gun_score},
                 )
-                conn.commit()
                 st.success("Updated ✅")
                 st.session_state.update_mode = None
 
     if st.session_state.update_mode == "tscore":
         with st.form("update_tscore"):
             st.subheader("Update Team's Score")
-            update_movie = st.selectbox("Movie Name", movie, key="update_movie")
+            update_movie = st.selectbox("Movie Name", movie_names, key="update_movie")
             update_team_score = st.slider("", 0, 10, key="update_team_slide")
 
             submitted = st.form_submit_button("Save")
             if submitted:
-                cursor.execute(
-                    "UPDATE movie_rating SET team_score = %s WHERE name = %s",
-                    (update_team_score, update_movie),
+                requests.put(
+                    f"{api_url}/update_movie",
+                    json={"filter_movie": update_movie, "team_score": update_team_score},
                 )
-                conn.commit()
                 st.success("Updated ✅")
                 st.session_state.update_mode = None
 
     if st.session_state.update_mode == "up_comment":
-        # with st.form("update_comment"):
         st.subheader("Update Comment")
-        update_movie = st.selectbox("Movie Name", movie, key="update_movie")
+        update_movie = st.selectbox("Movie Name", movie_names, key="update_movie")
         update_comment = st.text_area("")
 
-        # submitted = st.form_submit_button("Save")
-        # if submitted:
         if st.button("Save"):
-            cursor.execute(
-                "UPDATE movie_rating SET comment = %s WHERE name = %s",
-                (update_comment, update_movie),
+            requests.put(
+                f"{api_url}/update_movie",
+                json={"filter_movie": update_movie, "comment": update_comment},
             )
-            conn.commit()
             st.success("Updated ✅")
             st.session_state.update_mode = None
 

@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import pandas as pd
 import logging
 from datetime import date
+from typing import Optional
 from pydantic import BaseModel
 
 logging.basicConfig(level=logging.INFO)
@@ -22,6 +23,15 @@ class Movie(BaseModel):
 
 class Num(BaseModel):
     number: int
+
+class MovieUpdate(BaseModel):
+    id: Optional[int] = None
+    filter_movie: Optional[str] = None
+    movie: Optional[str] = None
+    date: Optional[str] = None
+    gun_score: Optional[int] = None
+    team_score: Optional[int] = None
+    comment: Optional[str] = None
 
 def get_conn():
     db_url = os.getenv("SUPABASE_DB_URL") 
@@ -73,6 +83,31 @@ def avg_score_by_month():
     )
     conn.close()
     return df.to_dict(orient="records")
+
+
+@app.put("/update_movie")
+def update_movie(update: MovieUpdate):
+    db_field_map = {"movie": "name", "date": "date", "gun_score": "gun_score", "team_score": "team_score", "comment": "comment"}
+    fields = {db_field_map[k]: v for k, v in update.dict().items() if k in db_field_map and v is not None}
+    if not fields:
+        return {"message": "nothing to update"}
+
+    conn = get_conn()
+    cursor = conn.cursor()
+    set_clause = ", ".join(f"{k} = %s" for k in fields)
+    values = list(fields.values())
+
+    if update.id is not None:
+        cursor.execute(f"UPDATE movie_rating SET {set_clause} WHERE id = %s", values + [update.id])
+    elif update.filter_movie is not None:
+        cursor.execute(f"UPDATE movie_rating SET {set_clause} WHERE name = %s", values + [update.filter_movie])
+    else:
+        return {"message": "no filter provided (id or filter_movie required)"}
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "updated"}
 
 
 @app.post("/test_add_num")
