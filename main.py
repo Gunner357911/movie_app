@@ -13,7 +13,8 @@ logging.basicConfig(level=logging.INFO)
 
 load_dotenv()
 
-db_url = os.getenv("SUPABASE_DB_URL") 
+api_url = os.getenv("API_URL")
+db_url = os.getenv("SUPABASE_DB_URL")
 # or st.secrets["SUPABASE_DB_URL"]
 conn = psycopg2.connect(db_url)
 
@@ -94,7 +95,7 @@ def add_movie():
 
                 logging.info(date)
 
-                res = requests.post("http://127.0.0.1:8000/add_movie", 
+                res = requests.post(f"{api_url}/add_movie",
                               json={"movie": movie, 
                                     "date": date.isoformat(), #JSON doesn't understand datetime
                                     "gun_score": gun_score,
@@ -118,7 +119,7 @@ def add_movie():
 
 
 def get_data():
-    data = requests.get("http://127.0.0.1:8000/show")
+    data = requests.get(f"{api_url}/show")
 
     #list of dict
     data = data.json()
@@ -273,7 +274,7 @@ def update_log_with_form():
 
 def avg_score_chart():
     st.header("Average Score by Month")
-    data = requests.get("http://127.0.0.1:8000/avg_score_by_month").json()
+    data = requests.get(f"{api_url}/avg_score_by_month").json()
     df = pd.DataFrame(data)
     if df.empty:
         st.info("No data available.")
