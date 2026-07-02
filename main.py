@@ -92,6 +92,45 @@ def show_quarterly():
     st.metric(label=f"This quarter: {quar}", value=f"{number} movie(s)")
 
 
+def show_quarterly_chart():
+    df = pd.read_sql_query(
+        """with a as
+    (SELECT *, concat(
+        EXTRACT(YEAR FROM date), '-',
+        CASE
+            WHEN EXTRACT(MONTH FROM date) BETWEEN 1 AND 3 THEN 'Q1'
+            WHEN EXTRACT(MONTH FROM date) BETWEEN 4 AND 6 THEN 'Q2'
+            WHEN EXTRACT(MONTH FROM date) BETWEEN 7 AND 9 THEN 'Q3'
+            WHEN EXTRACT(MONTH FROM date) BETWEEN 10 AND 12 THEN 'Q4'
+        END) AS quarter,
+        EXTRACT(YEAR FROM date) AS year
+    FROM movie_rating)
+
+    select quarter, year, count(*) as movies_count
+    from a group by quarter, year order by quarter""",
+        conn,
+    )
+
+    if df.empty:
+        return
+
+    df["year"] = df["year"].astype(int)
+    years = sorted(df["year"].unique(), reverse=True)
+
+    st.subheader("Movies Watched by Quarter")
+    selected_year = st.selectbox(
+        "Filter year",
+        years,
+        index=None,
+        placeholder="All years",
+        key="quarterly_chart_year",
+    )
+
+    chart_df = df if selected_year is None else df[df["year"] == selected_year]
+
+    st.bar_chart(chart_df.set_index("quarter")["movies_count"])
+
+
 def show_highest_rated():
     df = pd.read_sql_query(
         "SELECT name, gun_score, team_score FROM movie_rating",
@@ -352,6 +391,7 @@ with right:
     show_quarterly()
 
 show_highest_rated()
+show_quarterly_chart()
 
 add_movie()
 log()
