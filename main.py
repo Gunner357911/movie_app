@@ -184,6 +184,76 @@ def show_highest_rated():
     )
 
 
+def show_score_disagreements():
+    df = pd.read_sql_query(
+        """
+        SELECT name, gun_score, team_score
+        FROM movie_rating
+        WHERE gun_score IS NOT NULL
+          AND team_score IS NOT NULL
+          AND gun_score != 0
+          AND team_score != 0
+          AND ABS(gun_score - team_score) >= 2
+        ORDER BY ABS(gun_score - team_score) DESC
+        """,
+        conn,
+    )
+
+    st.subheader("🥊 Disagreements")
+
+    if df.empty:
+        st.caption("No movies yet where scores differ by 2 or more.")
+        return
+
+    for _, row in df.iterrows():
+        gap = int(abs(row["gun_score"] - row["team_score"]))
+        big = gap >= 3
+        tier_label = "😤 Big Disagreement" if big else "😕 Little Disagreement"
+        tier_color = "#E63946" if big else "#F4A261"
+
+        gun_wins = row["gun_score"] > row["team_score"]
+        gun_color = "#4CAF50" if gun_wins else "#a0a0b0"
+        team_color = "#a0a0b0" if gun_wins else "#4CAF50"
+
+        st.markdown(
+            f"""
+            <div style="
+                background: linear-gradient(135deg, #1e1e24 0%, #2a2a35 100%);
+                padding: 20px 24px;
+                border-radius: 12px;
+                border-left: 6px solid {tier_color};
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                margin: 12px 0;
+            ">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 18px; font-weight: 700; color: #FFFFFF;">{row['name']}</span>
+                    <span style="
+                        background: {tier_color};
+                        color: white;
+                        padding: 4px 12px;
+                        border-radius: 20px;
+                        font-size: 13px;
+                        font-weight: bold;
+                        white-space: nowrap;
+                    ">{tier_label} · Gap {gap}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 14px;">
+                    <div style="text-align: center; flex: 1;">
+                        <div style="font-size: 12px; color: #a0a0b0; text-transform: uppercase; letter-spacing: 1px;">Gun</div>
+                        <div style="font-size: 28px; font-weight: 800; color: {gun_color};">{row['gun_score']:.0f}</div>
+                    </div>
+                    <div style="text-align: center; color: #707080; font-size: 20px; align-self: center;">vs</div>
+                    <div style="text-align: center; flex: 1;">
+                        <div style="font-size: 12px; color: #a0a0b0; text-transform: uppercase; letter-spacing: 1px;">Team</div>
+                        <div style="font-size: 28px; font-weight: 800; color: {team_color};">{row['team_score']:.0f}</div>
+                    </div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+
 def add_movie():
     if "show_form" not in st.session_state:
         st.session_state.show_form = False
@@ -396,3 +466,4 @@ show_quarterly_chart()
 add_movie()
 log()
 update_log_with_form()
+show_score_disagreements()
