@@ -92,6 +92,21 @@ def show_quarterly():
     st.metric(label=f"This quarter: {quar}", value=f"{number} movie(s)")
 
 
+def show_annual():
+    df = pd.read_sql_query(
+        """with a as (
+        select 
+        name,
+        extract(year from date) as year
+        from movie_rating)
+
+        select count(*) from a where year = extract(year from current_date)""",
+        conn,
+    )
+    res = df.iloc[0, 0]
+    st.metric(label="This year we have watched:", value=f"{res} movie(s)")
+
+
 def show_quarterly_chart():
     df = pd.read_sql_query(
         """with a as
@@ -452,15 +467,17 @@ if not check_password():
 st.success("Welcome 🎉")
 st.write("This is our app!")
 
-left, right = st.columns(2)
+left, mid, right = st.columns(3)
 
 with left:
     show_monthly()
 
-with right:
+with mid:
     show_quarterly()
 
-show_highest_rated()
+with right:
+    show_annual()
+
 show_quarterly_chart()
 
 add_movie()
