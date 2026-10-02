@@ -17,26 +17,35 @@ export default function Login() {
   }
 
   return (
-    <form className="card login" onSubmit={onSubmit}>
-      <h1>Movie Rating App!</h1>
-      <label>
-        Email
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
-      </label>
-      <label>
-        Password
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          autoComplete="current-password"
-        />
-      </label>
-      {error && <p className="error">{error}</p>}
-      <button type="submit" disabled={loading}>
-        {loading ? 'Signing in…' : 'Sign in'}
-      </button>
-    </form>
+    <div className="login-wrap">
+      <form className="ticket" onSubmit={onSubmit}>
+        <div className="ticket-top">
+          <p className="eyebrow">Admit three · Members only</p>
+          <h1>
+            Movie <em>Night</em>
+          </h1>
+        </div>
+        <div className="ticket-stub">
+          <label className="field">
+            <span>Email</span>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
+          </label>
+          <label className="field">
+            <span>Password</span>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
+          </label>
+          {error && <p className="error">{error}</p>}
+          <button type="submit" className="primary block" disabled={loading}>
+            {loading ? 'Checking ticket…' : 'Enter'}
+          </button>
+        </div>
+      </form>
+    </div>
   )
 }

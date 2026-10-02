@@ -18,7 +18,7 @@ export type Movie = {
   date: string // YYYY-MM-DD
   gun_score: number | null
   team_score: number | null
-  comment: string
+  comment: string | null // older rows saved by the Streamlit app may have no comment
 }
 
 export type MovieInput = Omit<Movie, 'id'>
