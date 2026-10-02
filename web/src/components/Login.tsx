@@ -20,7 +20,7 @@ export default function Login() {
     <div className="login-wrap">
       <form className="ticket" onSubmit={onSubmit}>
         <div className="ticket-top">
-          <p className="eyebrow">Admit three · Members only</p>
+          <p className="eyebrow">Members only</p>
           <h1>
             Movie <em>Night</em>
           </h1>
