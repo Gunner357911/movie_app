@@ -1,32 +1,26 @@
-# React + TypeScript + Vite
+# Movie Rating App (React)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React + Vite frontend replacing the Streamlit `main.py`. It talks to Supabase directly with the public anon key; **Row Level Security is what protects the data**, so do the Supabase setup before anything else.
 
-Currently, two official plugins are available:
+## 1. Supabase setup (once)
+1. SQL Editor → run [`supabase/security.sql`](supabase/security.sql) (enables RLS, adds the allowlist and score checks).
+2. Authentication → Users → **Add user** for each of the 3 people (email + password).
+3. Authentication → Sign In / Providers → turn **off** "Allow new users to sign up".
+4. Run the `insert into allowed_users ...` line at the bottom of `security.sql` with your real emails.
+5. Advisors → Security: should show no "RLS disabled" warning.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## 2. Local dev
+```bash
+cp .env.example .env.local   # fill in URL + anon key from Project Settings → API
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## 3. Deploy to Netlify
+- Import the repo, set **Base directory** to `web` (build settings come from `netlify.toml`).
+- Environment variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. Nothing else: anything starting with `VITE_` ends up in the public JS.
+
+## Security checklist
+- Never put `SUPABASE_DB_URL` or the `service_role` key in this app.
+- If the DB password was ever shared or committed, rotate it in Supabase (Project Settings → Database).
+- Test: signed out, `movie_rating` must return no rows; a signed-in user not in `allowed_users` must not be able to read or write.
