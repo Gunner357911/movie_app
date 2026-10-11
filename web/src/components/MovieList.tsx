@@ -4,6 +4,7 @@ import { deleteMovie, updateMovie } from '../lib/movies'
 import { avgScore } from '../lib/stats'
 import { ScoreBars, ScorePicker } from './Scores'
 import YearChips from './YearChips'
+import Poster from './Poster'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const yearOf = (m: Movie) => Number(m.date.slice(0, 4))
@@ -108,7 +109,7 @@ function MovieCard({ movie, onChanged, notify }: { movie: Movie } & Handlers) {
     <article className="movie-card">
       <div className="card-side">
         <DateBlock date={movie.date} />
-        {movie.poster_url && <img className="poster" src={movie.poster_url} alt="" loading="lazy" />}
+        {movie.poster_url && <Poster src={movie.poster_url} title={movie.name} />}
       </div>
       <div className="movie-main">
         <div className="movie-head">
