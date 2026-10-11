@@ -19,6 +19,9 @@ export type Movie = {
   gun_score: number | null
   team_score: number | null
   comment: string | null // older rows saved by the Streamlit app may have no comment
+  // Set only by the Major Cineplex email import (apps-script/), never from the UI.
+  poster_url?: string | null
+  booking_number?: string | null
 }
 
 export type MovieInput = Omit<Movie, 'id'>

@@ -67,3 +67,17 @@ export function disagreements(movies: Movie[]): Disagreement[] {
     })
     .sort((a, b) => b.gap - a.gap)
 }
+
+// Local YYYY-MM-DD, comparable as a string with Movie.date.
+export function todayYmd(today = new Date()) {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`
+}
+
+// Already watched (date today or earlier) but missing a score, newest first.
+export function needsScore(movies: Movie[], today = new Date()): Movie[] {
+  const cutoff = todayYmd(today)
+  return movies
+    .filter((m) => (m.gun_score === null || m.team_score === null) && m.date <= cutoff)
+    .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)
+}

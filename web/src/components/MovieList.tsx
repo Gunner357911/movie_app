@@ -10,7 +10,7 @@ const yearOf = (m: Movie) => Number(m.date.slice(0, 4))
 
 type Handlers = { onChanged: () => void; notify: (message: string) => void }
 
-function DateBlock({ date }: { date: string }) {
+export function DateBlock({ date }: { date: string }) {
   const [y, m, d] = date.split('-')
   return (
     <div className="date-block">
@@ -106,7 +106,10 @@ function MovieCard({ movie, onChanged, notify }: { movie: Movie } & Handlers) {
 
   return (
     <article className="movie-card">
-      <DateBlock date={movie.date} />
+      <div className="card-side">
+        <DateBlock date={movie.date} />
+        {movie.poster_url && <img className="poster" src={movie.poster_url} alt="" loading="lazy" />}
+      </div>
       <div className="movie-main">
         <div className="movie-head">
           <h3>{movie.name}</h3>
