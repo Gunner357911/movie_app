@@ -9,6 +9,7 @@ import HighestRated from './components/HighestRated'
 import AddMovieDialog from './components/AddMovieDialog'
 import MovieList from './components/MovieList'
 import Disagreements from './components/Disagreements'
+import RateReminder from './components/RateReminder'
 
 export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
@@ -74,6 +75,7 @@ export default function App() {
           <p className="empty">Rolling the film…</p>
         ) : (
           <>
+            <RateReminder movies={movies} onChanged={reload} notify={notify} />
             <div className="hero">
               <HighestRated movies={movies} />
               <StatCards movies={movies} />

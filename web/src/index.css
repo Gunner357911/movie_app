@@ -338,6 +338,16 @@ input[type='date'] { color-scheme: dark; }
 .form-grid { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
 .form-grid .wide, .form-grid .score-picker { grid-column: 1 / -1; }
 
+/* ---------- Rate reminder ---------- */
+.reminder {
+  border-color: rgba(245, 184, 61, 0.45);
+  background: linear-gradient(180deg, rgba(245, 184, 61, 0.08), transparent 160px), var(--surface);
+}
+.reminder-card .movie-main { gap: 12px; }
+.reminder-card h3 { font-size: 17px; line-height: 1.25; overflow-wrap: anywhere; }
+.reminder-card.saving { opacity: 0.6; pointer-events: none; }
+.reminder-more { margin-top: 12px; }
+
 /* ---------- Add movie dialog ---------- */
 .sheet {
   width: min(560px, calc(100vw - 32px));

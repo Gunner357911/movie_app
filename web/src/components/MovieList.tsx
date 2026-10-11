@@ -10,7 +10,7 @@ const yearOf = (m: Movie) => Number(m.date.slice(0, 4))
 
 type Handlers = { onChanged: () => void; notify: (message: string) => void }
 
-function DateBlock({ date }: { date: string }) {
+export function DateBlock({ date }: { date: string }) {
   const [y, m, d] = date.split('-')
   return (
     <div className="date-block">
