@@ -4,6 +4,7 @@ import { updateMovie } from '../lib/movies'
 import { needsScore } from '../lib/stats'
 import { ScorePicker } from './Scores'
 import { DateBlock } from './MovieList'
+import Poster from './Poster'
 
 type Handlers = { onChanged: () => void; notify: (message: string) => void }
 
@@ -32,7 +33,7 @@ function ReminderCard({ movie, onChanged, notify }: { movie: Movie } & Handlers)
     <article className={`movie-card reminder-card ${saving ? 'saving' : ''}`}>
       <div className="card-side">
         <DateBlock date={movie.date} />
-        {movie.poster_url && <img className="poster" src={movie.poster_url} alt="" loading="lazy" />}
+        {movie.poster_url && <Poster src={movie.poster_url} title={movie.name} />}
       </div>
       <div className="movie-main">
         <h3>{movie.name}</h3>
