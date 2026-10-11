@@ -70,7 +70,9 @@ function importMessages_(messages, processed) {
         counts.skipped++
         continue
       }
-      const posterUrl = match.action === 'already_imported' ? null : uploadPoster_(message, ticket)
+      // Only fetch the poster when the movie will be created or doesn't have one yet.
+      const needsPoster = match.action === 'insert' || (match.action !== 'already_imported' && !match.has_poster)
+      const posterUrl = needsPoster ? uploadPoster_(message, ticket) : null
       callImport_(ticket, posterUrl)
       console.log(describe_(ticket, match))
       processed.push(message.getId())
@@ -266,6 +268,8 @@ function describe_(ticket, match) {
       return 'SKIP     ' + email + ' (already imported as movie ' + match.movie_id + ')'
     case 'attach':
       return 'ATTACH   ' + email + ' -> movie ' + match.movie_id + ' "' + match.movie_name + '" (adds poster, keeps scores)'
+    case 'rewatch':
+      return 'REWATCH  ' + email + ' -> movie ' + match.movie_id + ' "' + match.movie_name + '" (same movie, no new row)'
     case 'ambiguous':
       return 'AMBIGUOUS ' + email + ' (several movies on that date, none with this title: fix the title in the app)'
     default:

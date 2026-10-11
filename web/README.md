@@ -32,10 +32,12 @@ A Google Apps Script reads Major Cineplex booking confirmations in Gmail and add
    - `ATTACH ... -> movie 42 "..."`: links to a movie you already added (same date, and same title or the only movie that day). Adds the poster; name, scores and comment are kept.
    - `NEW`: adds a new movie with empty scores. If you had already added it, its **date** in the app probably differs from the showtime: fix the date in the app and run `dryRun` again.
    - `AMBIGUOUS`: several movies that day and none with this title. Rename yours to match, or it is skipped (retried every run).
-   - `SKIP`: already imported. No lines at all → fix the `from:` domain in `QUERY`.
+   - `REWATCH`: same title as a movie within a year (another date, or a second booking for the same show). Kept as one movie; no new row.
+   - `SKIP`: already imported. No lines at all → fix the `from:` domain in `SENDER_QUERY`.
 7. When every line looks right, run `importTickets` once and check the app, then `installTrigger` (runs every 10 minutes).
    - Older history (since 1 Jan 2025, one-off): `dryRunBackfill`, then `importBackfill`. Safe to re-run; if the log says "Out of time", run it again.
    - `CANNOT PARSE` lines: run `debugParse`. It logs which field failed and ~80 characters around each label, not the whole email.
+   - Repeat titles: `supabase/find_repeat_titles.sql` (read-only) lists every title with more than one row within a year. Rewatches imported as unscored rows before the rewatch rule can be removed with `merge_rewatches_preview.sql` then `merge_rewatches_apply.sql`; scored ones are left for you to delete by id.
 8. Once happy: `drop table movie_rating_backup;`. To undo an import instead: `delete from movie_rating where booking_number is not null and gun_score is null and team_score is null;` removes the newly added ones (attached rows only got a poster).
 
 What the script can access: Gmail **read-only** (it can't send, delete or change mail), and it only searches with the fixed `QUERY`. Google has no per-sender permission, so for full isolation use a separate Gmail account that receives the Major emails via a forwarding filter.
