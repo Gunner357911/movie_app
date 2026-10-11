@@ -13,18 +13,22 @@ I’m still a **beginner developer**, so the code may not be perfect, but it wor
 - Add a movie with a date
 - Each person can give their own score
 - One score can be added first, the other can be updated later
-- View rating history
+- **Reminds us to rate**: movies we've watched but haven't scored show up at the top, with one-tap scoring
+- **Adds movies by itself**: after buying a ticket on Major Cineplex, the confirmation email in Gmail is picked up and the movie (with its poster) appears in the app
+- Rewatching a movie doesn't create a duplicate
+- View rating history with posters, stats, a quarterly chart and our biggest disagreements
 - Edit data directly from the UI
-- Store everything in a local SQLite database
 
 ---
 
 ## 🛠 Tech Stack
 
-- **Python**
-- **Streamlit** (UI)
-- **Postgres** (Database)
-- **Pandas** (Data handling)
+- **React + Vite + TypeScript** (UI, in [`web/`](web/), deployed on Netlify)
+- **Supabase** (Postgres database, login, poster storage)
+- **Google Apps Script** (reads Major Cineplex ticket emails)
+- **Python + Streamlit + Pandas** (the original version, `main.py`, kept for reference)
+
+Setup and deployment steps are in [`web/README.md`](web/README.md).
 
 ---
 
@@ -43,15 +47,15 @@ It’s just a simple app to make movie nights more fun 😄
 
 - This is a beginner project
 - Code structure and best practices may not be perfect
-- Security is very basic and intended only for private use
+- Security is kept simple and intended only for private use (login for 3 people, protected by Supabase Row Level Security)
 
 ---
 
 ## 🚀 Why I built this
 
 I wanted to:
-- Practice Python and Streamlit
-- Learn how to use SQL(Supabase) with a real app
+- Practice Python and Streamlit, then React
+- Learn how to use SQL (Supabase) with a real app
 - Build something fun that I can actually use with friends
 
 ---
